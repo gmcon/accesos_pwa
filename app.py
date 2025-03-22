@@ -25,6 +25,7 @@ def registrar():
             writer.writerow(["alumno_id", "fecha"])
         writer.writerow(nuevo)
 
+    print(f"✔ Registro recibido: {alumno_id} a las {fecha}")
     return {"estado": "ok"}, 200
 
 @app.route("/")
