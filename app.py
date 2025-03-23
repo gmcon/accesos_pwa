@@ -1,5 +1,5 @@
 from flask import Flask, request
-from flask_cors import CORS
+from flask-cors import CORS
 import csv
 import os
 from datetime import datetime
