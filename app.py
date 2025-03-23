@@ -1,21 +1,18 @@
-from flask import Flask, request, send_file, render_template_string, url_for
+from flask import Flask, request, render_template_string, url_for
 from flask_cors import CORS
-import csv
-import os
+import requests
 from datetime import datetime
 
 app = Flask(__name__)
 CORS(app)
 
-RUTA_ARCHIVO = "registros.csv"
+SHEETDB_API_URL = "https://sheetdb.io/api/v1/cf7nxftgn1pil"
 
 @app.route("/registro", methods=["POST"])
 def registrar():
-    print("🛰 request.data crudo:", request.data)
-    print("📨 request.headers:", dict(request.headers))
     try:
         datos = request.get_json(force=True)
-        print("📦 Datos forzados recibidos:", datos)
+        print("📦 Datos recibidos:", datos)
     except Exception as e:
         print("❌ Error al obtener JSON:", e)
         return {"estado": "error", "mensaje": "Error al interpretar JSON"}, 400
@@ -26,49 +23,23 @@ def registrar():
     if not alumno_id:
         return {"estado": "error", "mensaje": "Falta ID"}, 400
 
-    nuevo = [alumno_id, fecha]
+    payload = {"data": {"alumno_id": alumno_id, "fecha": fecha}}
+    try:
+        response = requests.post(SHEETDB_API_URL, json=payload)
+        print(f"✔ Registro enviado a SheetDB: {alumno_id} a las {fecha}")
+    except Exception as e:
+        print("❌ Error al enviar a SheetDB:", e)
+        return {"estado": "error", "mensaje": "No se pudo registrar en SheetDB"}, 500
 
-    archivo_existe = os.path.exists(RUTA_ARCHIVO)
-    with open(RUTA_ARCHIVO, "a", newline="", encoding="utf-8") as f:
-        writer = csv.writer(f)
-        if not archivo_existe:
-            writer.writerow(["alumno_id", "fecha"])
-        writer.writerow(nuevo)
-
-    print(f"✔ Registro recibido: {alumno_id} a las {fecha}")
     return {"estado": "ok"}, 200
 
-@app.route("/descargar", methods=["GET"])
-def descargar():
-    if not os.path.exists(RUTA_ARCHIVO):
-        return "Aún no hay registros."
-    return send_file(RUTA_ARCHIVO, as_attachment=True)
-
-@app.route("/ver", methods=["GET"])
+@app.route("/ver")
 def ver():
-    if not os.path.exists(RUTA_ARCHIVO):
-        return "Aún no hay registros."
-    with open(RUTA_ARCHIVO, encoding="utf-8") as f:
-        reader = csv.reader(f)
-        filas = list(reader)
-    tabla_html = """
-    <html><head><title>Registros</title></head><body>
-    <h2>Registros de Acceso</h2>
-    <a href="{}" download><button>📥 Descargar CSV</button></a><br><br>
-    <table border="1" cellpadding="6" cellspacing="0">
-    <tr>{}</tr>
-    {}
-    </table></body></html>
-    """.format(
-        url_for('descargar'),
-        ''.join(f'<th>{col}</th>' for col in filas[0]),
-        ''.join('<tr>' + ''.join(f'<td>{dato}</td>' for dato in fila) + '</tr>' for fila in filas[1:])
-    )
-    return render_template_string(tabla_html)
+    return f"Puedes revisar los registros en tu hoja de cálculo aquí: <a href='https://docs.google.com/spreadsheets/d/'>Abrir hoja</a>"
 
 @app.route("/")
 def home():
-    return "Backend de registro operativo."
+    return "Backend de registro operativo conectado a Google Sheets vía SheetDB."
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)
