@@ -11,8 +11,13 @@ RUTA_ARCHIVO = "registros.csv"
 
 @app.route("/registro", methods=["POST"])
 def registrar():
-    datos = request.get_json()
-    print("📦 Datos recibidos:", datos)
+    try:
+        datos = request.get_json(force=True)
+        print("📦 Datos forzados recibidos:", datos)
+    except Exception as e:
+        print("❌ Error al obtener JSON:", e)
+        return {"estado": "error", "mensaje": "Error al interpretar JSON"}, 400
+
     alumno_id = datos.get("id")
     fecha = datos.get("fecha", datetime.utcnow().isoformat())
 
