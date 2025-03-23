@@ -12,6 +12,7 @@ RUTA_ARCHIVO = "registros.csv"
 @app.route("/registro", methods=["POST"])
 def registrar():
     datos = request.get_json()
+    print("📦 Datos recibidos:", datos)
     alumno_id = datos.get("id")
     fecha = datos.get("fecha", datetime.utcnow().isoformat())
 
