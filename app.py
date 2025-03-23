@@ -1,9 +1,11 @@
 from flask import Flask, request
+from flask_cors import CORS
 import csv
 import os
 from datetime import datetime
 
 app = Flask(__name__)
+CORS(app)
 
 RUTA_ARCHIVO = "registros.csv"
 
