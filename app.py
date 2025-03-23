@@ -26,7 +26,10 @@ def registrar():
     payload = {"data": {"alumno_id": alumno_id, "fecha": fecha}}
     try:
         response = requests.post(SHEETDB_API_URL, json=payload)
-        print(f"✔ Registro enviado a SheetDB: {alumno_id} a las {fecha}")
+        print(f"✔ Intento de registro: {alumno_id} a las {fecha}")
+        print(f"📡 Código respuesta: {response.status_code}")
+        print(f"📄 Respuesta texto: {response.text}")
+
     except Exception as e:
         print("❌ Error al enviar a SheetDB:", e)
         return {"estado": "error", "mensaje": "No se pudo registrar en SheetDB"}, 500
