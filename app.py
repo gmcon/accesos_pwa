@@ -11,6 +11,8 @@ RUTA_ARCHIVO = "registros.csv"
 
 @app.route("/registro", methods=["POST"])
 def registrar():
+    print("🛰 request.data crudo:", request.data)
+    print("📨 request.headers:", dict(request.headers))
     try:
         datos = request.get_json(force=True)
         print("📦 Datos forzados recibidos:", datos)
